@@ -5,7 +5,7 @@ dumppdf.py - dump pdf contents in XML format.
 usage:
   dumppdf.py [options] [files ...]
 options:
-  -i objid : object id
+  -i objid : object id asfn
 """
 import sys
 import os.path

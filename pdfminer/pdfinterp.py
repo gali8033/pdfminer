@@ -30,8 +30,6 @@ from .pdfcolor import PREDEFINED_COLORSPACE
 from .utils import choplist
 from .utils import mult_matrix
 from .utils import MATRIX_IDENTITY
-from memory_profiler import profile
-from memory_profiler import memory_usage
 
 
 #  Exceptions
@@ -843,7 +841,6 @@ class PDFPageInterpreter:
             pass
         return
 
-    @profile
     def process_page(self, page):
         if self.debug:
             logging.info('Processing page: %r' % page)
@@ -872,9 +869,7 @@ class PDFPageInterpreter:
         self.init_state(ctm)
         self.execute(list_value(streams))
         return
-    mem_usage = memory_usage(-1, interval=.01, timeout=1, backend="psutil")
 
-    @profile
     def execute(self, streams):
         try:
             parser = PDFContentParser(streams)

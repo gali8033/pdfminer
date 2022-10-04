@@ -30,7 +30,6 @@ from .pdfcolor import PREDEFINED_COLORSPACE
 from .utils import choplist
 from .utils import mult_matrix
 from .utils import MATRIX_IDENTITY
-from memory_profiler import profile
 
 
 #  Exceptions

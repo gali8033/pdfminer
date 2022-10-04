@@ -232,10 +232,22 @@ def decode_text(s):
 
 def q(s):
     """Quotes html string."""
-    return (s.replace('&', '&amp;')
-            .replace('<', '&lt;')
-            .replace('>', '&gt;')
-            .replace('"', '&quot;'))
+    new_str = s
+    for ch, r in [('&', '&amp;'),
+                  ('<', '&lt;'),
+                  ('>', '&gt;'),
+                  ('"', '&quot;')]:
+        if ch in s:
+            new_str = new_str.replace(ch, r)
+    return new_str
+
+
+"""
+return (s.replace('&', '&amp;')
+        .replace('<', '&lt;')
+        .replace('>', '&gt;')
+        .replace('"', '&quot;'))
+"""
 
 
 def bbox2str(bbox):

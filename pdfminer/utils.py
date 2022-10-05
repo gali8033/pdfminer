@@ -242,14 +242,6 @@ def q(s):
     return new_str
 
 
-"""
-return (s.replace('&', '&amp;')
-        .replace('<', '&lt;')
-        .replace('>', '&gt;')
-        .replace('"', '&quot;'))
-"""
-
-
 def bbox2str(bbox):
     (x0, y0, x1, y1) = bbox
     return '%.3f,%.3f,%.3f,%.3f' % (x0, y0, x1, y1)

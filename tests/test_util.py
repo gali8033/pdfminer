@@ -14,6 +14,13 @@ class TestUtils(unittest.TestCase):
         leftbbox = '25.000,50.000'
         self.assertEqual(leftbbox, pdfminer.utils.leftbbox2str(bbox))
 
+    def test_q(self):
+        self.assertEqual(pdfminer.utils.q('&'), '&amp;')
+        self.assertEqual(pdfminer.utils.q('<'), '&lt;')
+        self.assertEqual(pdfminer.utils.q('>'), '&gt;')
+        self.assertEqual(pdfminer.utils.q('"'), '&quot;')
+         
+
 
 if __name__ == '__main__':
     unittest.main()

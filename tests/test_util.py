@@ -19,7 +19,6 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(pdfminer.utils.q('<'), '&lt;')
         self.assertEqual(pdfminer.utils.q('>'), '&gt;')
         self.assertEqual(pdfminer.utils.q('"'), '&quot;')
-         
 
 
 if __name__ == '__main__':

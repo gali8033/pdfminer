@@ -352,20 +352,21 @@ class PDFPageInterpreter:
         for (k, v) in dict_value(resources).items():
             if self.debug:
                 logging.debug('Resource: %r: %r' % (k, v))
+            items = dict_value(v).items()
             if k == 'Font':
-                for (fontid, spec) in dict_value(v).items():
+                for (fontid, spec) in items:
                     objid = None
                     if isinstance(spec, PDFObjRef):
                         objid = spec.objid
                     spec = dict_value(spec)
                     self.fontmap[fontid] = self.rsrcmgr.get_font(objid, spec)
             elif k == 'ColorSpace':
-                for (csid, spec) in dict_value(v).items():
+                for (csid, spec) in items:
                     self.csmap[csid] = get_colorspace(resolve1(spec))
             elif k == 'ProcSet':
                 self.rsrcmgr.get_procset(list_value(v))
             elif k == 'XObject':
-                for (xobjid, xobjstrm) in dict_value(v).items():
+                for (xobjid, xobjstrm) in items:
                     self.xobjmap[xobjid] = xobjstrm
         return
 
@@ -882,8 +883,9 @@ class PDFPageInterpreter:
                 break
             if isinstance(obj, PSKeyword):
                 name = keyword_name(obj).decode('ascii')
-                method = 'do_%s' % name.replace('*', '_a').\
-                         replace('"', '_w').replace("'", '_q')
+                method = 'do_%s' % name.replace('*', '_a').replace('"', '_w')\
+                    .replace("'", '_q')
+
                 if hasattr(self, method):
                     func = getattr(self, method)
                     nargs = func.__code__.co_argcount-1

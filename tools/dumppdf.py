@@ -131,52 +131,66 @@ def dumpallobjs(out, doc, mode=None):
 
 
 # dumpoutline
+def _resolve_dest(dest, doc):
+    if isinstance(dest, str):
+        dest = resolve1(doc.get_dest(dest))
+    elif isinstance(dest, PSLiteral):
+        dest = resolve1(doc.get_dest(dest.name))
+    if isinstance(dest, dict):
+        dest = dest['D']
+    return dest
+
+
+def _resolve_action(a, doc, pages):
+    action = a.resolve()
+    if not isinstance(action, dict):
+        return None, None
+    subtype = action.get('S')
+    if not (subtype and
+            repr(subtype) == '/GoTo' and
+            action.get('D')):
+        return None, None
+
+    dest = _resolve_dest(action['D'], doc)
+    pageno = pages[dest[0].objid]
+    return dest, pageno
+
+
+def _collect_dump_output(doc, outfp, pages):
+    result_output = ''
+    outlines = doc.get_outlines()
+    outfp.write('<outlines>\n')
+    for (level, title, dest, a, se) in outlines:
+        pageno = None
+        if dest:
+            dest = _resolve_dest(dest, doc)
+            pageno = pages[dest[0].objid]
+        elif a:
+            dest, pageno = _resolve_action(a, doc, pages)
+        s = q(title)
+        outfp.write('<outline level="%r" title="%s">\n' % (level, s))
+        result_output += s
+        if dest is not None:
+            outfp.write('<dest>')
+            dumpxml(outfp, dest)
+            outfp.write('</dest>\n')
+        if pageno is not None:
+            outfp.write('<pageno>%r</pageno>\n' % pageno)
+        outfp.write('</outline>\n')
+    outfp.write('</outlines>\n')
+    return result_output
+
+
 def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                 dumpall=False, mode=None, extractdir=None):
+    result_output = ''
     with open(fname, 'rb') as fp:
         parser = PDFParser(fp)
         doc = PDFDocument(parser, password)
         pages = dict((page.pageid, pageno) for (pageno, page)
                      in enumerate(PDFPage.create_pages(doc)))
-
-        def resolve_dest(dest):
-            if isinstance(dest, str):
-                dest = resolve1(doc.get_dest(dest))
-            elif isinstance(dest, PSLiteral):
-                dest = resolve1(doc.get_dest(dest.name))
-            if isinstance(dest, dict):
-                dest = dest['D']
-            return dest
-
         try:
-            result_output = ''
-            outlines = doc.get_outlines()
-            outfp.write('<outlines>\n')
-            for (level, title, dest, a, se) in outlines:
-                pageno = None
-                if dest:
-                    dest = resolve_dest(dest)
-                    pageno = pages[dest[0].objid]
-                elif a:
-                    action = a.resolve()
-                    if isinstance(action, dict):
-                        subtype = action.get('S')
-                        if subtype and \
-                                repr(subtype) == '/GoTo' and \
-                                action.get('D'):
-                            dest = resolve_dest(action['D'])
-                            pageno = pages[dest[0].objid]
-                s = q(title)
-                outfp.write('<outline level="%r" title="%s">\n' % (level, s))
-                result_output += s
-                if dest is not None:
-                    outfp.write('<dest>')
-                    dumpxml(outfp, dest)
-                    outfp.write('</dest>\n')
-                if pageno is not None:
-                    outfp.write('<pageno>%r</pageno>\n' % pageno)
-                outfp.write('</outline>\n')
-            outfp.write('</outlines>\n')
+            result_output = _collect_dump_output(doc, outfp, pages)
         except PDFNoOutlines:
             pass
         parser.close()
